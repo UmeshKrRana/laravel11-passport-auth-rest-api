@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\TodoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,3 +23,6 @@ Route::controller(AuthController::class)->group(function () {
         });
     });
 });
+
+# Todos
+Route::resource('todos', TodoController::class)->middleware('auth:api');

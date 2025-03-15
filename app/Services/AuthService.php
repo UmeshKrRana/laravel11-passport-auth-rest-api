@@ -73,4 +73,11 @@ class AuthService
         }
         return false;
     }
+
+    /**
+     * Function: getAuthUser
+     */
+    public function getAuthUser() {
+        return Auth::user();
+    }
 }

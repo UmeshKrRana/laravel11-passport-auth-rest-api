@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -43,7 +42,16 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
+    }
+
+    /**
+     * Function: todos
+     * @relationType: hasMany
+     */
+    public function todos()
+    {
+        return $this->hasMany(Todo::class, 'user_id', 'id');
     }
 }

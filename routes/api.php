@@ -20,6 +20,8 @@ Route::controller(AuthController::class)->group(function () {
         Route::middleware(['auth:api'])->group(function () {
             Route::get('profile', 'userProfile')->name('profile');
             Route::get('logout', 'logout')->name('logout');
+
+            Route::post('refresh-token', 'refreshToken')->name('refresh-token');
         });
     });
 });

@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Repository\AuthRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 class AuthService
 {
@@ -43,13 +44,31 @@ class AuthService
             return false;
         }
 
-        $authUser = Auth::user();
-        $token    = $authUser->createToken('token')->accessToken;
+        $response = Http::asForm()->post(url('/oauth/token'), [
+            'grant_type'    => 'password',
+            'client_id'     => env('CLIENT_ID'),
+            'client_secret' => env('CLIENT_SECRET'),
+            'username'      => $request->email,
+            'password'      => $request->password,
+            'scope'         => '',
+        ]);
 
-        return [
-            'email' => $authUser->email,
-            'token' => $token,
-        ];
+        $authResponse = $response->json();
+
+        if (! empty($authResponse)) {
+            $authUser = Auth::user();
+            // $token    = $authUser->createToken('token')->accessToken;
+
+            return [
+                'email'         => $authUser->email,
+                'token_type'    => $authResponse['token_type'],
+                'expires_in'    => $authResponse['expires_in'],
+                'token'         => $authResponse['access_token'],
+                'refresh_token' => $authResponse['refresh_token'],
+            ];
+        }
+
+        return [];
     }
 
     /**
@@ -77,7 +96,38 @@ class AuthService
     /**
      * Function: getAuthUser
      */
-    public function getAuthUser() {
+    public function getAuthUser()
+    {
         return Auth::user();
+    }
+
+    /**
+     * Function: refreshToken
+     * @param object $request
+     * @return array
+     */
+    public function refreshToken($request)
+    {
+        $response = Http::asForm()->post(url('/oauth/token'), [
+            'grant_type'    => 'refresh_token',
+            'refresh_token' => $request->refresh_token,
+            'client_id'     => env('CLIENT_ID'),
+            'client_secret' => env('CLIENT_SECRET'),
+            'scope'         => '',
+        ]);
+
+        $authResponse = $response->json();
+
+        if (! empty($authResponse)) {
+            return [
+                'token_type'    => $authResponse['token_type'],
+                'expires_in'    => $authResponse['expires_in'],
+                'token'         => $authResponse['access_token'],
+                'refresh_token' => $authResponse['refresh_token'],
+            ];
+        }
+
+        return [];
+
     }
 }

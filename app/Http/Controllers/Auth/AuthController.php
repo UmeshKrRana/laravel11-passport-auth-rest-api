@@ -5,6 +5,7 @@ use App\Helper\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthLogin;
 use App\Http\Requests\AuthRegister;
+use App\Http\Requests\RefreshTokenRequest;
 use App\Services\AuthService;
 use Exception;
 use Illuminate\Http\Request;
@@ -102,6 +103,28 @@ class AuthController extends Controller
 
         } catch (Exception $e) {
             Log::error('Exception occured while logout the user' . $e->getMessage());
+            return ApiResponse::success(status: self::ERROR_STATUS, message: self::EXCEPTION_MESSAGE, statusCode: self::ERROR);
+        }
+    }
+
+    /**
+     * Function: refreshToken
+     * @param Illuminate\Http\Requests\RefreshTokenRequest
+     * @return Illuminate\Http\JsonResponse
+     */
+    public function refreshToken(RefreshTokenRequest $request)
+    {
+        try {
+            $authResponse = $this->authService->refreshToken($request);
+
+            if (! $authResponse) {
+                return ApiResponse::error(status: self::ERROR_STATUS, message: self::USER_NOT_FOUND, statusCode: self::ERROR);
+            }
+
+            return ApiResponse::success(status: self::SUCCESS_STATUS, message: self::SUCCESS_MESSAGE, data: $authResponse, statusCode: self::SUCCESS);
+
+        } catch (Exception $e) {
+            Log::error('Exception occured while refreshing the tokens' . $e->getMessage());
             return ApiResponse::success(status: self::ERROR_STATUS, message: self::EXCEPTION_MESSAGE, statusCode: self::ERROR);
         }
     }
